@@ -1,7 +1,8 @@
 package com.sjprogramming.restapi.springbootrestapiproject.controller;
 
-import java.util.List;
+import java.util.*;
 
+// import org.apache.el.stream.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,14 +49,28 @@ public class StudentController {
 	}
 	
 	@PutMapping("/student/update/{id}")
-	public Student updateStudents(@PathVariable int id) {
-	   Student student = repo.findById(id).get();
-	   student.setName("poonam");
-	   student.setPercentage(92);
-	   repo.save(student);
-	   return student;
-		
-	}
+public ResponseEntity<Student> updateStudent(@PathVariable int id, @RequestBody Student student) {
+    // Check if the student with the given ID exists
+    Optional<Student> optionalStudent = repo.findById(id);
+
+    if (optionalStudent.isPresent()) {
+        Student existingStudent = optionalStudent.get();
+
+        // Update the existing student's details
+        existingStudent.setName(student.getName());
+        existingStudent.setPercentage(student.getPercentage());
+        existingStudent.setBranch(student.getBranch());
+
+        // Save the updated student back to the repository
+        Student updatedStudent = repo.save(existingStudent);
+
+        // Return the updated student with HTTP status 200 (OK)
+        return ResponseEntity.ok(updatedStudent);
+    } else {
+        // If the student is not found, return HTTP status 404 (Not Found)
+        return ResponseEntity.notFound().build();
+    }
+}
 	@DeleteMapping("/student/delete/{id}")
 	@ResponseStatus(code = HttpStatus.NO_CONTENT)
 	public void removeStudent(@PathVariable int id) {
